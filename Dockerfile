@@ -5,7 +5,7 @@ FROM gcr.io/dataflow-templates-base/python39-template-launcher-base:${TAG}
 WORKDIR /
 
 ENV FLEX_TEMPLATE_PYTHON_REQUIREMENTS_FILE="requirements.txt"
-ENV FLEX_TEMPLATE_PYTHON_PY_FILE="pipeline.py"
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="setup.py"
 
 COPY ./requirements.txt /requirements.txt
 COPY ./pipeline.py /pipeline.py
