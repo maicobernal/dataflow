@@ -13,9 +13,6 @@
     "name": "bucket",
     "label": "GCS Bucket Name",
     "helpText": "The bucket name where the files are stored.",
-    "regexes": [
-    "^gs:\\/\\/[^\\n\\r]+$"
-    ],
     "paramType": "GCS_READ_BUCKET",
     "isOptional": false
 },
@@ -44,9 +41,8 @@
     "name": "runtime",
     "label": "Runtime",
     "helpText": "The time in minutes to re-run the pipeline.",
-    "paramType": "INTEGER",
-    "isOptional": true,
-    "defaultValue": "1"
+    "paramType": "TEXT",
+    "isOptional": true
 }
 ]
 }

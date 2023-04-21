@@ -1,14 +1,11 @@
+
 import pandas as pd
 import ast
 import numpy as np
 
-def dicc(row):
-    #result = json.loads(row)
-    result = ast.literal_eval(row)
-    return result
-
-
 def clean_attributes(business):
+    print('Cleaning attributes')
+
     atributtes = pd.json_normalize(data = business['attributes'])
     
     try: 
@@ -24,8 +21,8 @@ def clean_attributes(business):
         atributtes['Ambience'] = "{'romantic': False, 'intimate': False, 'classy': False, 'hipster': False, 'touristy': False, 'trendy': False, 'upscale': False, 'casual': False, 'divey': False}"
 
     
-    garage = pd.json_normalize(atributtes.BusinessParking.apply(dicc))
-    ambience = pd.json_normalize(atributtes['Ambience'].apply(dicc))
+    garage = pd.json_normalize(atributtes.BusinessParking.apply(lambda x: ast.literal_eval(x)))
+    ambience = pd.json_normalize(atributtes['Ambience'].apply(lambda x: ast.literal_eval(x)))
 
     atributtes['garage'] = garage['garage']
     atributtes['garage'].fillna(0, inplace=True)
@@ -41,12 +38,15 @@ def clean_attributes(business):
     try:
         atributtes['RestaurantsTakeOut'].fillna(0, inplace=True)
         atributtes['RestaurantsDelivery'].fillna(0, inplace=True)
+        atributtes['RestaurantsTableService'].fillna(0, inplace=True)
     except:
         atributtes['RestaurantsTakeOut'] = 'None'
         atributtes['RestaurantsDelivery'] = 'None'
+        atributtes['RestaurantsTableService'] = 'None'
         
     atributtes['RestaurantsTakeOut'] = atributtes['RestaurantsTakeOut'].map({'True': 1, 'False': 0, 'None': 0})
     atributtes['RestaurantsDelivery'] = atributtes['RestaurantsDelivery'].map({'True': 1, 'False': 0, 'None': 0})
+    atributtes['RestaurantsTableService'] = atributtes['RestaurantsTableService'].map({'True': 1, 'False': 0, 'None': 0})
     atributtes['delivery'] = atributtes['RestaurantsTakeOut'] + atributtes['RestaurantsDelivery']
     atributtes['delivery'] = pd.to_numeric(atributtes['delivery'], errors='coerce').fillna(0).astype(int)
     atributtes['delivery'] = atributtes['delivery'].replace(to_replace=2, value=1)
@@ -96,18 +96,37 @@ def clean_attributes(business):
     except:
         atributtes['GoodForMeal'] = "{'dessert': False, 'latenight': False, 'lunch': False, 'dinner': False, 'brunch': False, 'breakfast': False}"
     
-    meal_types = pd.json_normalize(atributtes['GoodForMeal'].apply(dicc))
+    meal_types = pd.json_normalize(atributtes['GoodForMeal'].apply(lambda x: ast.literal_eval(x)))
     atributtes.drop(['GoodForMeal'], axis=1, inplace=True)
     atributtes['meal_diversity'] = meal_types['dessert'] + meal_types['latenight'] + meal_types['lunch'] + meal_types['dinner'] + meal_types['brunch'] + meal_types['breakfast']
     atributtes['meal_diversity'].fillna(0, inplace=True)
     atributtes['meal_diversity'] = atributtes['meal_diversity'].astype(int)
+
     for i in atributtes.dtypes[atributtes.dtypes == object].index.tolist():
         atributtes[i] = atributtes[i].astype(str)
-        atributtes[i] = atributtes[i].str.replace('[^0-9]', '')
+        atributtes[i] = atributtes[i].str.replace('[^0-9]', '', regex=True)
         atributtes[i] = atributtes[i].astype(int)
 
-    #atributtes[]  = pd.to_numeric(atributtes[atributtes.dtypes[atributtes.dtypes == object].index.tolist()], errors='coerce').fillna(0).astype(int)
-    atributtes['business_id'] = business['business_id']
+    atributtes['business_id'] = pd.to_numeric(business['business_id'], errors='coerce').fillna(0)
+    
     atributtes.columns = [i.lower() for i in atributtes.columns.tolist()]
-    schema = {col: str(atributtes[col].dtype) for col in atributtes.columns}
-    return atributtes.to_dict(orient_='records'), schema
+
+    ## Generate schema
+    # schema = atributtes.dtypes.to_dict()
+    # schema_str = []
+    # for field, dtype in schema.items():
+    #     if dtype == 'INTEGER':
+    #         bq_type = 'INTEGER'
+    #     elif dtype == 'float64':
+    #         bq_type = 'FLOAT64'
+    #     elif dtype == 'bool':
+    #         bq_type = 'BOOLEAN'
+    #     else:
+    #         bq_type = 'STRING'
+
+    #     schema_str.append(f"{field}:{bq_type}")
+
+    # schema_str = ', '.join(schema_str)
+
+    return atributtes.to_dict(orient='records') #schema_str
+

@@ -2,13 +2,16 @@
 ARG TAG=latest
 FROM gcr.io/dataflow-templates-base/python39-template-launcher-base:${TAG}
 
-WORKDIR /
+ARG WORKDIR=/opt/dataflow
+RUN mkdir -p ${WORKDIR}
+WORKDIR ${WORKDIR}
 
-ENV FLEX_TEMPLATE_PYTHON_REQUIREMENTS_FILE="requirements.txt"
-ENV FLEX_TEMPLATE_PYTHON_PY_FILE="setup.py"
+ARG TEMPLATE_NAME=pipeline_trial
+COPY . ${WORKDIR}/
 
-COPY ./requirements.txt /requirements.txt
-COPY ./pipeline.py /pipeline.py
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE=${WORKDIR}/${TEMPLATE_NAME}/pipeline.py
+ENV FLEX_TEMPLATE_PYTHON_SETUP_FILE=${WORKDIR}/setup.py
+ENV FLEX_TEMPLATE_PYTHON_REQUIREMENTS_FILE=${WORKDIR}/requirements.txt
 
 # We could get rid of installing libffi-dev and git, or we could leave them.
 RUN apt-get update \

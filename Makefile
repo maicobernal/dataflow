@@ -1,7 +1,16 @@
+## Parameters for the Dataflow Job for an easy RUN
+## Change the following parameters to run the Dataflow Job on your own data and GCP Project
+BUCKET_TO_SEARCH ?= bqtrialbucket
+PARQUET_PATH ?= new_data
+DATASET ?= yelp
+TABLE ?= attributes_2
+RUNTIME?=1
 GCP_PROJECT ?= bqtrial-383917
 GCP_REGION ?= us-central1
 TEMPLATE_NAME ?= pipeline-trial
-TEMPLATE_TAG ?= 0.1.0
+TEMPLATE_TAG ?= 0.7.0
+
+## Parameters for the Dataflow Container
 PROJECT_NUMBER ?= $$(gcloud projects list --filter=${GCP_PROJECT} --format="value(PROJECT_NUMBER)")
 GCS_PATH ?= gs://${GCP_PROJECT}-dataflow-${PROJECT_NUMBER}
 TEMPLATE_PATH ?= ${GCS_PATH}/templates/${TEMPLATE_NAME}
@@ -43,8 +52,8 @@ template: ## Build Flex Template Container and Upload Container to GCS Bucket
 	# Build Data Flex Template and Upload to GCS
 	gcloud dataflow flex-template build ${GCS_PATH}/templates/${TEMPLATE_TAG}/${TEMPLATE_NAME}.json \
     --image ${TEMPLATE_IMAGE} \
-    --sdk-language PYTHON \
-    --metadata-file ${TEMPLATE_NAME}-metadata
+    --sdk-language "PYTHON" \
+    --metadata-file ${TEMPLATE_NAME}-metadata.json
 
 run: ## Run the Dataflow Container
 	gcloud config set project ${GCP_PROJECT}
@@ -53,4 +62,4 @@ run: ## Run the Dataflow Container
     --region ${GCP_REGION} \
     --staging-location ${GCS_PATH}/staging \
 	--temp-location ${GCS_PATH}/temp \
-    --parameters output=${OUTPUT}
+    --parameters project="${GCP_PROJECT}",bucket="${BUCKET_TO_SEARCH}",parquetpath="${PARQUET_PATH}",dataset="${DATASET}",table="${TABLE}",runtime="${RUNTIME}"

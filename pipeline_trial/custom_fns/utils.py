@@ -1,33 +1,42 @@
 from google.cloud import storage
+from google.cloud import bigquery
 import os
 
-# Parse Parquet records into JSON format
-def parse_parquet(element):
-    data = element.to_dict()
-    return data
-
 # Function to get the list of new files
-def get_new_files(project_id, bucket_name, input, processed_files_path):
+def get_new_files(project_id, bucket_name, dataset, parquet_path):
     # Set up GCP storage client
     client = storage.Client(project = project_id)
     bucket = client.get_bucket(bucket_name)
 
     # Get all parquet files in the folder
-    blobs = bucket.list_blobs(prefix=input)
+    blobs = bucket.list_blobs(prefix=parquet_path + '/')
 
-    # Get the list of processed files
-    processed_files = set()
-    if os.path.exists(processed_files_path):
-        with open(processed_files_path, "r") as f:
-            processed_files = set(line.strip() for line in f)
+    # Get the filenames of the processed files from BigQuery table
+    client = bigquery.Client(project = project_id)
+    query = f"""
+    SELECT 
+    archivo
+    FROM `{project_id}.{dataset}.registro`
+    ORDER BY fecha DESC
+    LIMIT 100
+    """
+    lista_procesados = client.query(query, location='US').to_dataframe()['archivo'].tolist()
+    
+    processed_files = set(lista_procesados)
 
     # Get new files that haven't been processed yet
-    new_files = [blob.name for blob in blobs if blob.name not in processed_files]
+    new_files = [blob.name for blob in blobs if blob.name not in processed_files and blob.name.endswith(".parquet")]
 
     return new_files
 
-
 # Update the list of processed files
-def update_processed_files(file_name, processed_files_path):
-    with open(processed_files_path, "a") as f:
-        f.write(file_name + "\n")
+def update_processed_files(file_name, project_id, dataset):
+
+    client = bigquery.Client(project = project_id)
+
+    query = f"""
+    INSERT INTO `{project_id}.{dataset}.registro` (archivo, fecha)
+    VALUES ('{file_name}', DATETIME(CURRENT_TIMESTAMP()))
+    """
+
+    client.query(query, location='US')

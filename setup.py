@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='pipeline-trial',
-    version='1.0',
+    version='3.0',
     install_requires=[],
     packages=setuptools.find_packages(),
     include_package_data=True,
