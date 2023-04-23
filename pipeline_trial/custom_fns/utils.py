@@ -6,7 +6,7 @@ import os
 def get_new_files(project_id, bucket_name, dataset, parquet_path):
     # Set up GCP storage client
     client = storage.Client(project = project_id)
-    bucket = client.get_bucket(bucket_name)
+    bucket = client.get_bucket(bucket_name.replace('gs://', ''))
 
     # Get all parquet files in the folder
     blobs = bucket.list_blobs(prefix=parquet_path + '/')

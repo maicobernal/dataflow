@@ -8,7 +8,7 @@ RUNTIME?=1
 GCP_PROJECT ?= bqtrial-383917
 GCP_REGION ?= us-central1
 TEMPLATE_NAME ?= pipeline-trial
-TEMPLATE_TAG ?= 0.7.0
+TEMPLATE_TAG ?= 1.0.0
 
 ## Parameters for the Dataflow Container
 PROJECT_NUMBER ?= $$(gcloud projects list --filter=${GCP_PROJECT} --format="value(PROJECT_NUMBER)")

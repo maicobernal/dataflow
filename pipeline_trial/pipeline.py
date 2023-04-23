@@ -60,7 +60,7 @@ def run(argv=None, save_main_session=False):
 
     beam_options = PipelineOptions(beam_args, save_main_session=save_main_session)
 
-    full_file_path = 'gs://' + args.bucket + '/'
+    full_file_path = args.bucket + '/'
     
     interval = 1 * int(args.runtime)  # 1 minute default
 
