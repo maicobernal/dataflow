@@ -36,13 +36,6 @@
     "helpText": "The BigQuery table to store the data.",
     "paramType": "TEXT",
     "isOptional": false
-},
-{
-    "name": "runtime",
-    "label": "Runtime",
-    "helpText": "The time in minutes to re-run the pipeline.",
-    "paramType": "TEXT",
-    "isOptional": true
 }
 ]
 }

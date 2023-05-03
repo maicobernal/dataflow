@@ -4,11 +4,10 @@ BUCKET_TO_SEARCH ?= bqtrialbucket
 PARQUET_PATH ?= new_data
 DATASET ?= yelp
 TABLE ?= attributes_2
-RUNTIME?=1
 GCP_PROJECT ?= bqtrial-383917
 GCP_REGION ?= us-central1
 TEMPLATE_NAME ?= pipeline-trial
-TEMPLATE_TAG ?= 1.0.0
+TEMPLATE_TAG ?= 1.2.0
 
 ## Parameters for the Dataflow Container
 PROJECT_NUMBER ?= $$(gcloud projects list --filter=${GCP_PROJECT} --format="value(PROJECT_NUMBER)")
@@ -62,4 +61,4 @@ run: ## Run the Dataflow Container
     --region ${GCP_REGION} \
     --staging-location ${GCS_PATH}/staging \
 	--temp-location ${GCS_PATH}/temp \
-    --parameters project="${GCP_PROJECT}",bucket="${BUCKET_TO_SEARCH}",parquetpath="${PARQUET_PATH}",dataset="${DATASET}",table="${TABLE}",runtime="${RUNTIME}"
+    --parameters project="${GCP_PROJECT}",bucket="${BUCKET_TO_SEARCH}",parquetpath="${PARQUET_PATH}",dataset="${DATASET}",table="${TABLE}"

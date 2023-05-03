@@ -42,12 +42,6 @@ def run(argv=None, save_main_session=False):
         required=True,
         dest='table',
         help='The BigQuery table to store the data.')
-    parser.add_argument(
-        '--runtime',
-        required=True,
-        dest='runtime',
-        help='The time in minutes to re-run the pipeline.'
-        )
     
     args, beam_args = parser.parse_known_args(argv)
 
@@ -61,17 +55,16 @@ def run(argv=None, save_main_session=False):
     beam_options = PipelineOptions(beam_args, save_main_session=save_main_session)
 
     full_file_path = args.bucket + '/'
-    
-    interval = 1 * int(args.runtime)  # 1 minute default
 
     while True:
         new_files = utils.get_new_files(args.project, args.bucket, args.dataset, args.parquetpath)
 
         if len(new_files) == 0:
-            print(f"No new files found. Sleeping for {interval*60} seconds")
-            time.sleep(interval)
-            continue
+            print(f"No new files found. Exiting pipeline")
+            break
         else:
+            print('Total files founded: ' + str(len(new_files)))
+            print('Starting pipeline...')
             for file_name in new_files:
                 print(f"Processing new file: {file_name}")
 
@@ -95,8 +88,7 @@ def run(argv=None, save_main_session=False):
                 print('Done processing file: ' + file_name)
                 utils.update_processed_files(file_name, args.project, args.dataset)
 
-            print(f'Done processing all files. Sleeping for {interval} minute to check new files')
-            time.sleep(interval)
+            print(f'Done processing all files. Checking for new files and exiting if no new files are founded')
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.WARNING)
